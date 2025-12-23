@@ -1,0 +1,151 @@
+<!-- templates/editor.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Edit – Media Studio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="dash-body">
+    <div class="background-gradient"></div>
+
+    <header class="topbar glass">
+        <div class="left">
+            <span class="logo-circle">MS</span>
+            <h1>Edit image</h1>
+        </div>
+        <div class="right">
+            <a href="{{ url_for('utils.dashboard') }}" class="btn-outline">Back to dashboard</a>
+        </div>
+    </header>
+
+    <main class="container editor-grid">
+        <section class="preview glass">
+            <h2>Preview</h2>
+            <div class="preview-inner">
+                <img id="preview-image" src="{{ url_for('static', filename='uploads/' ~ filename) }}" alt="preview">
+            </div>
+            <p class="muted small-text">
+                Move the sliders to see live changes. Click “Save edited copy” to apply them permanently.
+            </p>
+        </section>
+
+        <section class="controls glass">
+            <h2>Edit controls</h2>
+            <form id="edit-form" method="POST" class="controls-form">
+                <!-- Resize -->
+                <div class="control-group">
+                    <h3>Resize</h3>
+                    <div class="row two">
+                        <div class="field">
+                            <label>Width (px)</label>
+                            <input type="number" name="width" min="1" placeholder="auto">
+                        </div>
+                        <div class="field">
+                            <label>Height (px)</label>
+                            <input type="number" name="height" min="1" placeholder="auto">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Crop -->
+                <div class="control-group">
+                    <h3>Crop</h3>
+                    <div class="row four">
+                        <div class="field">
+                            <label>Left</label>
+                            <input type="number" name="left">
+                        </div>
+                        <div class="field">
+                            <label>Top</label>
+                            <input type="number" name="top">
+                        </div>
+                        <div class="field">
+                            <label>Right</label>
+                            <input type="number" name="right">
+                        </div>
+                        <div class="field">
+                            <label>Bottom</label>
+                            <input type="number" name="bottom">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tune -->
+                <div class="control-group">
+                    <h3>Tune</h3>
+                    <label class="slider-label">
+                        Brightness
+                        <input type="range" name="brightness" id="brightness" min="0.2" max="2" step="0.1" value="1">
+                    </label>
+                    <label class="slider-label">
+                        Sharpness
+                        <input type="range" name="sharpness" id="sharpness" min="0" max="3" step="0.1" value="1">
+                    </label>
+                    <label class="slider-label">
+                        Contrast
+                        <input type="range" name="contrast" id="contrast" min="0.2" max="2" step="0.1" value="1">
+                    </label>
+                    <label class="checkbox-inline">
+                        <input type="checkbox" name="blur" id="blur">
+                        Slight blur
+                    </label>
+                </div>
+
+                <!-- Output -->
+                <div class="control-group">
+                    <h3>Output</h3>
+                    <div class="row two">
+                        <div class="field">
+                            <label>Format</label>
+                            <select name="format" id="format">
+                                <option value="PNG">PNG</option>
+                                <option value="JPEG">JPEG</option>
+                                <option value="WEBP">WEBP</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Quality</label>
+                            <input type="number" name="quality" id="quality" min="10" max="100" value="90">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary full">Save edited copy</button>
+            </form>
+        </section>
+    </main>
+
+    <script>
+        // Live preview using CSS filter (frontend only) [web:118][web:114][web:111]
+        const img = document.getElementById('preview-image');
+        const brightness = document.getElementById('brightness');
+        const sharpness = document.getElementById('sharpness');
+        const contrast = document.getElementById('contrast');
+        const blur = document.getElementById('blur');
+
+        function updatePreview() {
+            const b = parseFloat(brightness.value);
+            const c = parseFloat(contrast.value);
+            const sharp = parseFloat(sharpness.value);
+
+            // sharpness is simulated using contrast + saturation tweak
+            const blurPx = blur.checked ? 2 : 0;
+
+            img.style.filter =
+                `brightness(${b}) contrast(${c}) saturate(${1 + (sharp - 1) * 0.6}) blur(${blurPx}px)`;
+        }
+
+        brightness.addEventListener('input', updatePreview);
+        contrast.addEventListener('input', updatePreview);
+        sharpness.addEventListener('input', updatePreview);
+        blur.addEventListener('change', updatePreview);
+
+        // init once
+        updatePreview();
+    </script>
+</body>
+
+</html>
