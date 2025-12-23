@@ -2,27 +2,29 @@ provider "aws" {
   region = var.aws_region
 }
 
+variable "aws_region" {
+  default = "eu-north-1"
+}
+
 resource "random_id" "suffix" {
   byte_length = 4
 }
 
-# Reference EXISTING security group (don't recreate)
 data "aws_security_group" "existing_proj4_sg" {
   name = "proj4-ec2-sg"
 }
 
 resource "aws_instance" "proj4_ec2" {
-  ami           = "ami-0b46816ffa1234887"
-  instance_type = "t3.micro"
-  key_name      = "proj"
-
+  ami                    = "ami-0b46816ffa1234887"
+  instance_type          = "t3.micro"
+  key_name               = "proj"
   vpc_security_group_ids = [data.aws_security_group.existing_proj4_sg.id]
 
   tags = {
-    Name = "proj4-ec2"
+    Name = "proj4-ec2-${random_id.suffix.hex}"
   }
 
-user_data = base64encode(<<-EOF
+  user_data = base64encode(<<-EOF
 #!/bin/bash
 yum update -y
 yum install -y python3 python3-pip git
@@ -54,11 +56,11 @@ systemctl daemon-reload
 systemctl enable flask-app
 systemctl start flask-app
 EOF
-)
-
+  )
+}
 
 resource "aws_s3_bucket" "proj4_bucket" {
-  bucket = "proj4-image-db-${random_id.suffix.hex}"
+  bucket        = "proj4-image-db-${random_id.suffix.hex}"
   force_destroy = true
 }
 
@@ -75,8 +77,7 @@ resource "aws_s3_bucket_ownership_controls" "proj4_bucket" {
 }
 
 resource "aws_s3_bucket_public_access_block" "proj4_bucket" {
-  bucket = aws_s3_bucket.proj4_bucket.id
-
+  bucket                  = aws_s3_bucket.proj4_bucket.id
   block_public_acls       = false
   block_public_policy     = false
   ignore_public_acls      = false
