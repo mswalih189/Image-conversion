@@ -3,3 +3,4 @@ Flask-Login==0.6.3
 Flask-SQLAlchemy==3.0.5
 Werkzeug==2.3.8
 Pillow==9.5.0
+gunicorn==21.2.0
