@@ -8,7 +8,6 @@ app.secret_key = 'your-super-secret-key-2025'
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-# Ensure upload folder
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 def allowed_file(filename):
@@ -19,18 +18,17 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        # Simple auth (change in production)
         if username == 'admin' and password == 'admin123':
             session['logged_in'] = True
             session['username'] = username
             return redirect(url_for('dashboard'))
-        flash('Invalid credentials!')
+        flash('❌ Invalid credentials!')
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        flash('Registered! Use admin/admin123')
+        flash('✅ Registered! Login: admin/admin123')
         return redirect(url_for('login'))
     return render_template('register.html')
 
@@ -54,17 +52,18 @@ def upload():
         return redirect(url_for('login'))
     
     if 'file' not in request.files:
-        return redirect(request.referrer)
+        flash('❌ No file selected!')
+        return redirect(url_for('dashboard'))
     
     file = request.files['file']
     if file.filename == '' or not allowed_file(file.filename):
-        flash('Invalid file!')
-        return redirect(request.referrer)
+        flash('❌ Invalid file type!')
+        return redirect(url_for('dashboard'))
     
     filename = secure_filename(file.filename)
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     file.save(filepath)
-    flash(f'✅ {filename} uploaded!')
+    flash(f'✅ {filename} uploaded successfully!')
     return redirect(url_for('dashboard'))
 
 @app.route('/editor/<filename>')
@@ -80,17 +79,15 @@ def process_image(filename):
     
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     if not os.path.exists(filepath):
-        flash('File not found!')
+        flash('❌ File not found!')
         return redirect(url_for('dashboard'))
     
     with Image.open(filepath) as img:
-        # Get actions from form
         rotate = request.form.get('rotate', '0')
         flip_h = request.form.get('flip_h')
         flip_v = request.form.get('flip_v')
         grayscale = request.form.get('grayscale')
         
-        # Apply transformations
         if rotate == '90':
             img = img.rotate(90, expand=True)
         elif rotate == '180':
@@ -105,7 +102,6 @@ def process_image(filename):
         if grayscale:
             img = img.convert('L')
         
-        # Save processed image
         new_filename = f"processed_{filename}"
         new_path = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
         img.save(new_path)
