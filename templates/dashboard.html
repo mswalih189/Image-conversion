@@ -1,69 +1,280 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard - Image Editor</title>
-    <meta name="viewport" content="width=device-width">
+    <title>Image Dashboard Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; }
-        .header { background: #667eea; color: white; padding: 20px; text-align: center; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .upload-section { background: white; padding: 30px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .files-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .file-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; }
-        .file-card img { max-width: 100%; max-height: 200px; border-radius: 10px; margin-bottom: 15px; }
-        .btn { display: inline-block; padding: 10px 20px; margin: 5px; border-radius: 8px; text-decoration: none; font-weight: bold; transition: all 0.3s; }
-        .btn-primary { background: #667eea; color: white; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-danger { background: #dc3545; color: white; }
-        .btn-warning { background: #ffc107; color: #212529; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .flash { padding: 15px; margin: 20px 0; border-radius: 10px; background: #d4edda; color: #155724; border-left: 5px solid #28a745; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
+            min-height: 100vh;
+        }
+        .header { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            padding: 30px; 
+            text-align: center; 
+            box-shadow: 0 15px 35px rgba(102,126,234,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: ''; 
+            position: absolute; 
+            top: -50%; 
+            right: -50%; 
+            width: 100%; 
+            height: 100%; 
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); 
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+        .header h1 { 
+            font-size: 3em; 
+            margin-bottom: 10px; 
+            position: relative; 
+            z-index: 2;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
+        .upload-section { 
+            background: rgba(255,255,255,0.95); 
+            padding: 50px; 
+            border-radius: 30px; 
+            margin-bottom: 50px; 
+            box-shadow: 0 25px 60px rgba(0,0,0,0.15); 
+            text-align: center; 
+            border: 3px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+        }
+        .upload-section::before {
+            content: ''; 
+            position: absolute; 
+            inset: 0; 
+            padding: 3px; 
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #28a745); 
+            border-radius: 30px; 
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); 
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); 
+            mask-composite: exclude;
+        }
+        .upload-section h2 { 
+            color: #333; 
+            margin-bottom: 30px; 
+            font-size: 2.5em;
+        }
+        .upload-input { 
+            padding: 25px; 
+            border: 4px dashed #667eea; 
+            border-radius: 25px; 
+            width: 100%; 
+            max-width: 600px; 
+            font-size: 18px; 
+            background: #f8f9fa; 
+            transition: all 0.3s;
+            margin-bottom: 30px;
+        }
+        .upload-input:hover, .upload-input:focus { 
+            border-color: #28a745; 
+            background: white; 
+            box-shadow: 0 10px 30px rgba(102,126,234,0.2);
+        }
+        .files-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 40px; 
+            padding-bottom: 20px; 
+            border-bottom: 4px solid #667eea;
+        }
+        .files-header h2 { color: #333; font-size: 2.5em; }
+        .file-count { 
+            background: linear-gradient(45deg, #28a745, #20c997); 
+            color: white; 
+            padding: 15px 30px; 
+            border-radius: 50px; 
+            font-size: 1.3em; 
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(40,167,69,0.3);
+        }
+        .files-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); 
+            gap: 35px; 
+            margin-top: 30px;
+        }
+        .file-card { 
+            background: rgba(255,255,255,0.95); 
+            border-radius: 25px; 
+            padding: 35px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15); 
+            text-align: center; 
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+            position: relative; 
+            overflow: hidden;
+            border: 3px solid transparent;
+        }
+        .file-card::before {
+            content: ''; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            height: 5px; 
+            background: linear-gradient(90deg, #667eea, #28a745, #ffc107);
+        }
+        .file-card:hover { 
+            transform: translateY(-15px) rotateX(5deg); 
+            box-shadow: 0 40px 80px rgba(0,0,0,0.25);
+        }
+        .file-card img { 
+            max-width: 100%; 
+            max-height: 280px; 
+            border-radius: 20px; 
+            margin-bottom: 25px; 
+            transition: all 0.5s ease;
+            border: 6px solid #f8f9fa;
+        }
+        .file-card:hover img { 
+            transform: scale(1.08) rotate(2deg); 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+        .file-card h4 { 
+            margin-bottom: 30px; 
+            color: #333; 
+            font-size: 1.4em; 
+            font-weight: 700;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            min-width: 140px;
+            justify-content: center;
+        }
+        .btn::before {
+            content: ''; 
+            position: absolute; 
+            top: 0; 
+            left: -100%; 
+            width: 100%; 
+            height: 100%; 
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); 
+            transition: left 0.7s;
+        }
+        .btn:hover::before { left: 100%; }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-success { background: linear-gradient(135deg, #28a745, #20c997); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #ffc107, #fd7e14); color: #212529; }
+        .btn-danger { background: linear-gradient(135deg, #dc3545, #c82333); color: white; }
+        .btn:hover { 
+            transform: translateY(-8px) scale(1.08); 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.35);
+        }
+        .btn span { font-size: 24px; }
+        .flash { 
+            padding: 25px; 
+            margin: 30px 0; 
+            border-radius: 20px; 
+            background: linear-gradient(135deg, #d4edda, #c3e6cb); 
+            color: #155724; 
+            border-left: 8px solid #28a745; 
+            box-shadow: 0 10px 30px rgba(40,167,69,0.2);
+            animation: slideIn 0.5s ease;
+        }
+        @keyframes slideIn { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .empty-state { 
+            text-align: center; 
+            padding: 120px 40px; 
+            color: #666; 
+            background: rgba(255,255,255,0.7); 
+            border-radius: 30px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+        .empty-state div { font-size: 8em; margin-bottom: 30px; opacity: 0.7; }
+        @media (max-width: 768px) { 
+            .files-grid { grid-template-columns: 1fr; gap: 25px; } 
+            .action-buttons { flex-direction: column; gap: 12px; }
+            .container { padding: 20px 15px; }
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>🖼️ Welcome, {{ username }}!</h1>
-        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+        <h1>🖼️ Pro Dashboard</h1>
+        <p>Welcome back, <strong style="font-size:1.3em;">{{ username }}</strong>!</p>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger" style="display:inline-block; padding:18px 35px; font-size:16px; margin-top:15px;">🚪 Logout</a>
     </div>
     
     <div class="container">
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 {% for message in messages %}
-                    <div class="flash">{{ message }}</div>
+                    <div class="flash">
+                        <span style="font-size:1.2em;">{{ message }}</span>
+                    </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
         
+        <!-- Upload Pro -->
         <div class="upload-section">
-            <h2>📤 Upload New Image</h2>
-            <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data" style="text-align: center;">
-                <input type="file" name="file" accept="image/*" required style="padding:15px; border:2px dashed #667eea; border-radius:10px; width:100%; max-width:400px;">
-                <br><br>
-                <button type="submit" class="btn btn-primary">Upload Image</button>
+            <h2>🚀 Upload New Masterpiece</h2>
+            <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+                <input type="file" name="file" accept="image/*" required class="upload-input">
+                <button type="submit" class="btn btn-primary" style="width:auto; padding:22px 60px; font-size:20px; margin-top:25px;">✨ Upload Magic ✨</button>
             </form>
         </div>
         
-        <h2>🖼️ Your Images</h2>
+        <!-- Files Gallery -->
+        <div class="files-header">
+            <h2>🎨 Your Gallery</h2>
+            {% if files %}
+                <div class="file-count">{{ files|length }} Masterpieces</div>
+            {% endif %}
+        </div>
+        
         {% if files %}
             <div class="files-grid">
                 {% for file in files %}
                     <div class="file-card">
-                        <img src="/static/uploads/{{ file }}" alt="{{ file }}">
+                        <img src="/static/uploads/{{ file }}" alt="{{ file }}" loading="lazy">
                         <h4>{{ file }}</h4>
-                        <div>
-                            <a href="{{ url_for('editor', filename=file) }}" class="btn btn-warning">✏️ Edit</a>
-                            <a href="{{ url_for('download', filename=file) }}" class="btn btn-success">📥 Download</a>
-                            <a href="{{ url_for('delete', filename=file) }}" class="btn btn-danger" onclick="return confirm('Delete?')">🗑️ Delete</a>
+                        <div class="action-buttons">
+                            <a href="{{ url_for('editor', filename=file) }}" class="btn btn-warning" title="✏️ Edit Masterpiece">
+                                <span>✏️</span> Edit
+                            </a>
+                            <a href="{{ url_for('download', filename=file) }}" class="btn btn-success" title="💾 Save Masterpiece" download>
+                                <span>💾</span> Download
+                            </a>
+                            <a href="{{ url_for('delete', filename=file) }}" class="btn btn-danger" title="🗑️ Archive" onclick="return confirm('🗑️ Archive {{ file }}?\n\nThis action cannot be undone! 💔')">
+                                <span>🗑️</span> Archive
+                            </a>
                         </div>
                     </div>
                 {% endfor %}
             </div>
         {% else %}
-            <div style="text-align:center; padding:50px; color:#666;">
-                <h3>No images yet!</h3>
-                <p>Upload your first image above 👆</p>
+            <div class="empty-state">
+                <div>🖼️</div>
+                <h2>No Masterpieces Yet!</h2>
+                <p style="font-size:22px; margin-top:20px;">Upload your first image above and start the magic ✨</p>
             </div>
         {% endif %}
     </div>
