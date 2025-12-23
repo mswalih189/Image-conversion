@@ -1,50 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Register – Media Studio</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Register - Image Editor</title>
+    <meta name="viewport" content="width=device-width">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .register-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        .btn { width: 100%; padding: 15px; background: #f5576c; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+    </style>
 </head>
-
-<body class="auth-body">
-    <div class="background-gradient"></div>
-
-    <div class="card glass auth-card">
-        <h1 class="app-title">Media Studio</h1>
-        <h2 class="auth-title">Create account</h2>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        <ul class="flash-list">
-            {% for category, message in messages %}
-            <li class="flash {{ category }}">{{ message }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
+<body>
+    <div class="register-box">
+        <h2>👤 Register</h2>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div style="padding: 12px; background: #d4edda; color: #155724; border-radius: 8px; margin: 10px 0;">{{ messages[0] }}</div>
+            {% endif %}
         {% endwith %}
-
-        <form method="POST" class="auth-form">
-            <div class="field">
-                <label>Name</label>
-                <input type="text" name="name" placeholder="Your name" required>
-            </div>
-            <div class="field">
-                <label>Email</label>
-                <input type="email" name="email" placeholder="you@example.com" required>
-            </div>
-            <div class="field">
-                <label>Password</label>
-                <input type="password" name="password" placeholder="••••••••" required>
-            </div>
-            <button type="submit" class="btn-primary full">Sign up</button>
+        <form method="POST">
+            <input type="text" name="username" placeholder="Username" required style="width:100%; padding:15px; margin:10px 0; border:2px solid #ddd; border-radius:8px;">
+            <input type="password" name="password" placeholder="Password" required style="width:100%; padding:15px; margin:10px 0; border:2px solid #ddd; border-radius:8px;">
+            <button type="submit" class="btn">Register</button>
         </form>
-
-        <p class="small-text">
-            Already have an account?
-            <a href="{{ url_for('auth.login') }}">Login</a>
-        </p>
+        <p style="text-align: center; margin-top: 20px;"><a href="{{ url_for('login') }}" style="color: #f5576c;">← Back to Login</a></p>
     </div>
 </body>
-
 </html>
