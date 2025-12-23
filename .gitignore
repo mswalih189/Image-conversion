@@ -11,3 +11,7 @@ database.db
 
 # Environment
 .env
+
+infra/.terraform/
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
