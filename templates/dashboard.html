@@ -1,76 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Dashboard – Media Studio</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Dashboard - Image Editor</title>
+    <meta name="viewport" content="width=device-width">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; }
+        .header { background: #667eea; color: white; padding: 20px; text-align: center; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .upload-section { background: white; padding: 30px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .files-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .file-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; }
+        .file-card img { max-width: 100%; max-height: 200px; border-radius: 10px; margin-bottom: 15px; }
+        .btn { display: inline-block; padding: 10px 20px; margin: 5px; border-radius: 8px; text-decoration: none; font-weight: bold; transition: all 0.3s; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .flash { padding: 15px; margin: 20px 0; border-radius: 10px; background: #d4edda; color: #155724; border-left: 5px solid #28a745; }
+    </style>
 </head>
-
-<body class="dash-body">
-    <div class="background-gradient"></div>
-
-    <header class="topbar glass">
-        <div class="left">
-            <span class="logo-circle">MS</span>
-            <h1>Media Studio</h1>
-        </div>
-        <div class="right">
-            <span class="user-label">Hi, {{ user.name }}</span>
-            <a href="{{ url_for('auth.logout') }}" class="btn-outline">Logout</a>
-        </div>
-    </header>
-
-    <main class="container grid-main">
-        <section class="upload-card glass">
-            <h2>Upload image</h2>
-            <p class="muted">Drag & drop or click to choose an image. It will be stored locally in this instance.</p>
-
-            {% with messages = get_flashed_messages(with_categories=true) %}
+<body>
+    <div class="header">
+        <h1>🖼️ Welcome, {{ username }}!</h1>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+    </div>
+    
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
             {% if messages %}
-            <ul class="flash-list">
-                {% for category, message in messages %}
-                <li class="flash {{ category }}">{{ message }}</li>
+                {% for message in messages %}
+                    <div class="flash">{{ message }}</div>
                 {% endfor %}
-            </ul>
             {% endif %}
-            {% endwith %}
-
-            <form action="{{ url_for('utils.upload') }}" method="POST" enctype="multipart/form-data">
-                <label class="dropzone">
-                    <input type="file" name="image" accept="image/*" required>
-                    <span class="drop-main">Drop file here or <span class="accent">browse</span></span>
-                    <span class="drop-sub">PNG • JPG • WEBP • GIF</span>
-                </label>
-                <button type="submit" class="btn-primary full">Upload</button>
+        {% endwith %}
+        
+        <div class="upload-section">
+            <h2>📤 Upload New Image</h2>
+            <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data" style="text-align: center;">
+                <input type="file" name="file" accept="image/*" required style="padding:15px; border:2px dashed #667eea; border-radius:10px; width:100%; max-width:400px;">
+                <br><br>
+                <button type="submit" class="btn btn-primary">Upload Image</button>
             </form>
-        </section>
-
-        <section class="gallery glass">
-            <div class="gallery-head">
-                <h2>Your images</h2>
-                <span class="badge">{{ files|length }} file(s)</span>
-            </div>
-
-            <div class="gallery-grid">
-                {% for f in files %}
-                <article class="card img-card">
-                    <div class="img-wrap">
-                        <img src="{{ url_for('static', filename='uploads/' ~ f) }}" alt="{{ f }}">
-                    </div>
-                    <div class="img-footer">
-                        <span class="filename" title="{{ f }}">{{ f }}</span>
-                        <div class="actions">
-                            <a href="{{ url_for('utils.edit', filename=f) }}" class="btn-small">Edit</a>
+        </div>
+        
+        <h2>🖼️ Your Images</h2>
+        {% if files %}
+            <div class="files-grid">
+                {% for file in files %}
+                    <div class="file-card">
+                        <img src="/static/uploads/{{ file }}" alt="{{ file }}">
+                        <h4>{{ file }}</h4>
+                        <div>
+                            <a href="{{ url_for('editor', filename=file) }}" class="btn btn-warning">✏️ Edit</a>
+                            <a href="{{ url_for('download', filename=file) }}" class="btn btn-success">📥 Download</a>
+                            <a href="{{ url_for('delete', filename=file) }}" class="btn btn-danger" onclick="return confirm('Delete?')">🗑️ Delete</a>
                         </div>
                     </div>
-                </article>
-                {% else %}
-                <p class="muted">No images yet. Upload one to get started.</p>
                 {% endfor %}
             </div>
-        </section>
-    </main>
+        {% else %}
+            <div style="text-align:center; padding:50px; color:#666;">
+                <h3>No images yet!</h3>
+                <p>Upload your first image above 👆</p>
+            </div>
+        {% endif %}
+    </div>
 </body>
-
 </html>
