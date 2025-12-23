@@ -1,31 +1,28 @@
 #!/bin/bash
-set -eux
+yum update -y
+yum install -y python3 python3-pip git
+pip3 install flask boto3 pillow
 
-apt-get update -y
-apt-get install -y python3 python3-venv python3-pip git
+# Create Flask app directory
+mkdir -p /opt/image_s3_app
+cd /opt/image_s3_app
 
-APP_DIR=/opt/image_s3_app
-mkdir -p "$APP_DIR"
-cd "$APP_DIR"
-
-# Clone your GitHub repo
+# Clone your repo
 git clone https://github.com/mswalih189/Image-conversion.git .
-python3 -m venv venv
-source venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 
-# Simple systemd service for Flask app
-cat >/etc/systemd/system/flask-app.service <<EOF
+# Create systemd service
+cat > /etc/systemd/system/flask-app.service <<EOF
 [Unit]
-Description=Flask Image App
+Description=Flask Image Conversion App
 After=network.target
 
 [Service]
-User=root
-WorkingDirectory=$APP_DIR
+User=ec2-user
+WorkingDirectory=/opt/image_s3_app
 Environment="FLASK_APP=app.py"
-ExecStart=$APP_DIR/venv/bin/python app.py
+Environment="FLASK_ENV=production"
+ExecStart=/usr/local/bin/gunicorn --bind 0.0.0.0:5000 app:app
 Restart=always
 
 [Install]
@@ -35,4 +32,3 @@ EOF
 systemctl daemon-reload
 systemctl enable flask-app
 systemctl start flask-app
-
