@@ -235,17 +235,62 @@
         {% endwith %}
         
         <!-- Upload Pro -->
-        <div class="upload-section">
-            <h2>🚀 Upload New Masterpiece</h2>
-            <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data">
-                <input type="file" name="file" accept="image/*" required class="upload-input">
-                <button type="submit" class="btn btn-primary" style="width:auto; padding:22px 60px; font-size:20px; margin-top:25px;">✨ Upload Magic ✨</button>
-            </form>
+      <!-- FIXED Upload Section -->
+<div class="upload-section">
+    <h2>🚀 Upload New Masterpiece</h2>
+    <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data" id="uploadForm">
+        <div style="position: relative; display: inline-block; width: 100%; max-width: 600px; margin-bottom: 30px;">
+            <!-- Hidden real file input -->
+            <input type="file" name="file" accept="image/*" required id="fileInput" 
+                   style="position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2;">
+            
+            <!-- Styled overlay -->
+            <div class="upload-input" style="padding: 40px; border: 4px dashed #667eea; border-radius: 25px; 
+                                           background: linear-gradient(135deg, #f8f9fa 0%, white 100%); 
+                                           text-align: center; cursor: pointer; transition: all 0.3s;
+                                           font-size: 18px; min-height: 120px; display: flex; flex-direction: column; 
+                                           align-items: center; justify-content: center; gap: 15px;">
+                <div style="font-size: 48px;">📤</div>
+                <div id="uploadText">Click to choose or drag image here</div>
+                <div style="font-size: 14px; color: #666;">PNG, JPG, GIF (Max 16MB)</div>
+            </div>
         </div>
+        <button type="submit" class="btn btn-primary" style="width:auto; padding:22px 60px; font-size:20px; margin: 0 auto; display: block;">
+            🚀 Upload Pic  🖼️ 
+        </button>
+    </form>
+</div>
+
+<script>
+document.getElementById('fileInput').addEventListener('change', function(e) {
+    const fileName = e.target.files[0]?.name || 'Choose image';
+    document.getElementById('uploadText').textContent = `Selected: ${fileName}`;
+});
+
+// Drag & Drop
+const uploadArea = document.querySelector('.upload-section');
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.style.borderColor = '#28a745';
+});
+uploadArea.addEventListener('dragleave', () => {
+    uploadArea.style.borderColor = '#667eea';
+});
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.style.borderColor = '#667eea';
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        document.getElementById('fileInput').files = files;
+        document.getElementById('uploadText').textContent = `Selected: ${files[0].name}`;
+    }
+});
+</script>
+
         
         <!-- Files Gallery -->
         <div class="files-header">
-            <h2>🎨 Your Gallery</h2>
+            <h2> 🖼️  Your Gallery</h2>
             {% if files %}
                 <div class="file-count">{{ files|length }} Masterpieces</div>
             {% endif %}
